@@ -2,8 +2,11 @@
 
 import socket
 from urllib import parse
-import os.path as path
+import os
 from multiprocessing import Process
+import threading
+
+import mqtt_handle
 
 # 设置静态文件根目录
 HTML_ROOT_DIR = "./html"
@@ -31,14 +34,14 @@ def make_response(file_name):
     根据文件内容构造响应数据
     """
     # 判断目录是否存在
-    if not path.exists(file_name):
+    if not os.path.exists(file_name):
         response_start_line = "HTTP/1.1 404 Not Found\r\n"
         response_headers = "Server: My server\r\n"
         response_body = "<h1>404 Not Found</h1><p>The file is not found! </p>"
     else:
         # 判断是否加锁
-        lock_dir = path.dirname(file_name) + "/.lock"
-        if path.exists(lock_dir):
+        lock_dir = os.path.dirname(file_name) + "/.lock"
+        if os.path.exists(lock_dir):
             response_start_line = "HTTP/1.1 423 Locked\r\n"
             response_headers = "Server: My server\r\n"
             response_body = "<h1>423 Locked</h1><p>The directory is locked. </p><p>Please try again later. </p>"
@@ -104,4 +107,7 @@ def main():
 
 
 if __name__ == "__main__":
+    handle_mqtt = threading.Thread(target=mqtt_handle.main)
+    handle_mqtt.setDaemon(True)
+    handle_mqtt.start()
     main()
