@@ -23,3 +23,17 @@ publish的消息必须在/values/node_name/item主题下
 接收到_upload表示开始接收传输数据, 在指定的node_name目录下创建.lock文件
 
 接收到_end表示结束数据传输, 删除指定的node_name目录下的.lock文件
+
+## 附录1: http状态码
+
+### 200 OK
+
+请求已成功
+
+### 404 Not Found
+
+请求失败, 请求所希望得到的资源未被在服务器上发现
+
+### 423 Locked
+
+当前资源被锁定
