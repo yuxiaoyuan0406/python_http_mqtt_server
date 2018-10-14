@@ -2,3 +2,4 @@
 *.pyproj
 .vs/
 .lock
+__pycache__/

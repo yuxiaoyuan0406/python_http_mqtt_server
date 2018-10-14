@@ -73,7 +73,7 @@ def main():
     client = mqtt.Client()
     client.on_connect = on_connect
     client.on_message = on_message
-    client.connect("192.168.12.1", 1883, 60)
+    client.connect("192.168.137.153", 1883, 60)
     client.loop_start()
     os.chdir(HTML_ROOT_DIR)
     while True:
