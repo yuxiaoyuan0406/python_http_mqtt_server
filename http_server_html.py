@@ -89,8 +89,7 @@ def handle_client(client_socket):
     # 关闭客户端连接
     client_socket.close()
 
-
-if __name__ == "__main__":
+def main():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server_socket.bind(("", 8000))
@@ -102,3 +101,7 @@ if __name__ == "__main__":
         handle_client_process = Process(target=handle_client, args=(client_socket,))
         handle_client_process.start()
         client_socket.close()
+
+
+if __name__ == "__main__":
+    main()
