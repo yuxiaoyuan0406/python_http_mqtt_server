@@ -9,7 +9,7 @@ import threading
 import mqtt_handle
 
 # 设置静态文件根目录
-HTML_ROOT_DIR = "./html"
+HTML_ROOT_DIR = "."     # 这里由于在mqtt_handle中更改了工作目录到./html, 所以这里静态文件目录是工作目录
 
 def get_file_name(client_socket):
     '''
@@ -95,7 +95,7 @@ def handle_client(client_socket):
 def main():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_socket.bind(("", 8000))
+    server_socket.bind(("", 8888))
     server_socket.listen(128)
 
     while True:
