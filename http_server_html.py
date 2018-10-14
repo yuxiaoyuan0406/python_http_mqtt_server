@@ -1,28 +1,74 @@
 # coding:utf-8
 
 import socket
-# import re
-
+from urllib import parse
+import os.path as path
 from multiprocessing import Process
 
 # 设置静态文件根目录
 HTML_ROOT_DIR = "./html"
+
+def get_file_name(client_socket):
+    '''
+    获取客户端请求
+    '''
+    # 获取客户端请求数据
+    request_data = client_socket.recv(1024)
+    # print("request data:", request_data)
+    request_lines = request_data.splitlines()
+    # 解析请求报文
+    request_start_line = request_lines[0]
+    # print("request date line 0:\n", request_start_line)
+    # 提取用户请求的文件名
+    request_start_line = request_start_line.decode("utf-8")
+    request_start_line = parse.unquote_plus(request_start_line)
+    file_name = request_start_line[request_start_line.find("GET ") + 4: request_start_line.find(" HTTP")]
+    # 返回文件名
+    return file_name
+
+def make_response(file_name):
+    """
+    根据文件内容构造响应数据
+    """
+    # 判断目录是否存在
+    if not path.exists(file_name):
+        response_start_line = "HTTP/1.1 404 Not Found\r\n"
+        response_headers = "Server: My server\r\n"
+        response_body = "<h1>404 Not Found</h1><p>The file is not found! </p>"
+    else:
+        # 判断是否加锁
+        lock_dir = path.dirname(file_name) + "/.lock"
+        if path.exists(lock_dir):
+            response_start_line = "HTTP/1.1 423 Locked\r\n"
+            response_headers = "Server: My server\r\n"
+            response_body = "<h1>423 Locked</h1><p>The directory is locked. </p><p>Please try again later. </p>"
+        else:
+            # 尝试打开文件
+            try:
+                file = open(file_name, "rb")
+            # 弹出异常
+            except IOError:
+                response_start_line = "HTTP/1.1 404 Not Found\r\n"
+                response_headers = "Server: My server\r\n"
+                response_body = "<h1>404 Not Found</h1><p>The file is not found! </p>"
+            else:
+                file_data = file.read()
+                file.close()
+                response_start_line = "HTTP/1.1 200 OK\r\n"
+                response_headers = "Server: My server\r\n"
+                response_body = file_data.decode("utf-8")
+
+    response = response_start_line + response_headers + "\r\n" + response_body
+    # print("response data:", response)
+    return response
 
 
 def handle_client(client_socket):
     """
     处理客户端请求
     """
-    # 获取客户端请求数据
-    request_data = client_socket.recv(1024)
-    print("request data:", request_data)
-    request_lines = request_data.splitlines()
-    # 解析请求报文
-    request_start_line = request_lines[0]
-    print("request date line 0:\n", request_start_line)
-    # 提取用户请求的文件名
-    request_start_line = request_start_line.decode("utf-8")
-    file_name = request_start_line[request_start_line.find("GET ") + 4: request_start_line.find(" HTTP")]
+    # 获取客户端请求
+    file_name = get_file_name(client_socket)
 
     if "/" == file_name:
         file_name = "/index.html"
@@ -36,28 +82,10 @@ def handle_client(client_socket):
             file_name += item
     print("file name:\n", file_name)
 
-    # 打开文件，读取内容
-    try:
-        file = open(HTML_ROOT_DIR + file_name, "rb")
-    except IOError:
-        response_start_line = "HTTP/1.1 404 Not Found\r\n"
-        response_headers = "Server: My server\r\n"
-        response_body = "The file is not found!"
-    else:
-        file_data = file.read()
-        file.close()
-
-        # 构造响应数据
-        response_start_line = "HTTP/1.1 200 OK\r\n"
-        response_headers = "Server: My server\r\n"
-        response_body = file_data.decode("utf-8")
-
-    response = response_start_line + response_headers + "\r\n" + response_body
-    print("response data:", response)
-
+    file_name = HTML_ROOT_DIR + file_name
+    response = make_response(file_name)
     # 向客户端返回响应数据
     client_socket.send(bytes(response, "utf-8"))
-
     # 关闭客户端连接
     client_socket.close()
 
