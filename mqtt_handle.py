@@ -43,21 +43,42 @@ def handle_mesage(topic, message):
             print("Begin transmission. ")
             file = open(node_name + '/' + item + '.html', 'w')
             lock = open(node_name + '/' + '.lock', 'w')
-            lock.write("locked. ")
+            lock.write("uploading")
             lock.close()
             file.close()
     elif message == '_end':
-        print("Transmission done. ")
-        os.remove(node_name + '/' + '.lock')
-    else:
-        print("Write: %s" % message)
-        try:
-            file = open(node_name + '/' + item + '.html', 'a')
-        except IOError:
-            pass
+        if os.path.exists('/' + node_name + '/' + '.lock'):
+            lock = open(node_name + '/' + '.lock', 'r')
+            lock_message = lock.readline()
+            lock.close();
+            if lock_message is "uploading":
+                print("Transmission done. ")
+                os.remove(node_name + '/' + '.lock')
+            else:
+                print("Directory is not aviliable. ")
+                print("Nothing to end. ")
         else:
-            file.write(message + '\n')
-            file.close()
+            print("Nothing to end. ")
+    else:
+        if os.path.exists('/' + node_name + '/' + '.lock'):
+            lock = open(node_name + '/' + '.lock', 'r')
+            lock_message = lock.readline()
+            lock.close();
+            if lock_message is "uploading":
+                print("Write: %s" % message)
+                try:
+                    file = open(node_name + '/' + item + '.html', 'a')
+                except IOError:
+                    pass
+                else:
+                    file.write(message + '\n')
+                    file.close()
+            else:
+                print("Directory is not aviliable. ")
+                print("Message dropped. ")
+        else:
+            print("Directory %s/ is not locked. " % node_name)
+            print("Message dropped. ")
 
 def on_message(client, userdata, msg):
     '''
@@ -73,7 +94,7 @@ def main():
     client = mqtt.Client()
     client.on_connect = on_connect
     client.on_message = on_message
-    client.connect("192.168.137.153", 1883, 60)
+    client.connect("192.168.12.1", 1883, 60)
     client.loop_start()
     os.chdir(HTML_ROOT_DIR)
     while True:
