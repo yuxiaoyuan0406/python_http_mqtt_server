@@ -37,48 +37,26 @@ def handle_mesage(topic, message):
     if not os.path.exists('./'+node_name):
         os.mkdir(node_name)
     if message == '_upload':
-        if os.path.exists('/' + node_name + '/' + '.lock'):
-            print("Directory locked. ")
-        else:
-            print("Begin transmission. ")
-            file = open(node_name + '/' + item + '.html', 'w')
-            lock = open(node_name + '/' + '.lock', 'w')
-            lock.write("uploading")
-            lock.close()
-            file.close()
+        print("Begin transmission. ")
+        file = open(node_name + '/' + item + '.html', 'w')
+        lock = open(node_name + '/' + '.lock', 'w')
+        lock.write("uploading")
+        lock.close()
+        file.close()
+
     elif message == '_end':
-        if os.path.exists('/' + node_name + '/' + '.lock'):
-            lock = open(node_name + '/' + '.lock', 'r')
-            lock_message = lock.readline()
-            lock.close();
-            if lock_message is "uploading":
-                print("Transmission done. ")
-                os.remove(node_name + '/' + '.lock')
-            else:
-                print("Directory is not aviliable. ")
-                print("Nothing to end. ")
-        else:
-            print("Nothing to end. ")
+        print("Transmission done. ")
+        os.remove(node_name + '/' + '.lock')
+
     else:
-        if os.path.exists('/' + node_name + '/' + '.lock'):
-            lock = open(node_name + '/' + '.lock', 'r')
-            lock_message = lock.readline()
-            lock.close();
-            if lock_message is "uploading":
-                print("Write: %s" % message)
-                try:
-                    file = open(node_name + '/' + item + '.html', 'a')
-                except IOError:
-                    pass
-                else:
-                    file.write(message + '\n')
-                    file.close()
-            else:
-                print("Directory is not aviliable. ")
-                print("Message dropped. ")
+        print("Write: %s" % message)
+        try:
+            file = open(node_name + '/' + item + '.html', 'a')
+        except IOError:
+            pass
         else:
-            print("Directory %s/ is not locked. " % node_name)
-            print("Message dropped. ")
+            file.write(message + '\n')
+            file.close()
 
 def on_message(client, userdata, msg):
     '''
