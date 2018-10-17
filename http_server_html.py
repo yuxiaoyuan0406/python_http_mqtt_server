@@ -16,11 +16,10 @@ def get_file_name(client_socket):
     获取客户端请求
     '''
     # 获取客户端请求数据
-    request_data = client_socket.recv(1024)
+    request_start_line = client_socket.recv(1024)
     # print("request data:", request_data)
-    request_lines = request_data.splitlines()
+    # request_lines = request_data.splitlines()
     # 解析请求报文
-    request_start_line = request_lines[0]
     # print("request date line 0:\n", request_start_line)
     # 提取用户请求的文件名
     request_start_line = request_start_line.decode("utf-8")
@@ -95,7 +94,7 @@ def handle_client(client_socket):
 def main():
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    server_socket.bind(("", 8888))
+    server_socket.bind(("", 8081))
     server_socket.listen(128)
 
     while True:
