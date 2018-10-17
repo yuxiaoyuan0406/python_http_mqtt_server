@@ -1,11 +1,28 @@
 # python http server
 
-## example
+## 功能叙述
 
-192.168.12.1:8000/node_name/item.html  
+本程序将mqtt发布的消息写入到文本文件  
+然后同时可以作为http服务器开放对这些文件的访问  
+
+## example 1
+
+192.168.12.1:8081/node_name/item.html  
 item中必然包含file_list, 其他内容待定  
-node_name中必然包含laser, 其他内容待定  
+item中必然包含report, 其他内容待定  
+node_name中名称可以自动生成  
 若访问的文件所在目录下存在.lock文件, 则文件被加锁
+
+## example 2
+
+执行方法  
+linux下在命令行输入指令下面指令  
+
+'''
+python3 http_server_html.py
+'''
+
+则开始执行
 
 ## mqtt传输协议
 
